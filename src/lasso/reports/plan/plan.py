@@ -5,12 +5,10 @@ import os
 import sys
 import traceback
 
+from github3 import login
 from jinja2 import Template
-from pds_github_util.issues.utils import get_labels
-from pds_github_util.issues.utils import is_theme
-from pds_github_util.utils import addStandardArguments
-from pds_github_util.utils import GithubConnection
-from pds_github_util.zenhub.zenhub import Zenhub
+from lasso.reports.argparse import add_standard_arguments
+from lasso.reports.zenhub.zenhub import Zenhub
 from pkg_resources import resource_string
 from yaml import FullLoader
 from yaml import load
@@ -37,6 +35,30 @@ REPO_INFO = (
 _logger = logging.getLogger(__name__)
 
 
+def is_theme(labels, zen_issue):
+    """Check if issue is a release theme.
+
+    Use the input Github Issue object and Zenhub Issue object to check:
+    * if issue is an Epic (Zenhub)
+    * if issue contains a `theme` label
+    """
+    if zen_issue["is_epic"]:
+        if "theme" in labels:
+            return True
+
+
+def get_labels(gh_issue):
+    """Get Label Names.
+
+    Return list of label names for easier access
+    """
+    labels = []
+    for label in gh_issue.labels():
+        labels.append(label.name)
+
+    return labels
+
+
 def append_to_project(proj, output):
     """Append to the project."""
     if "output" in proj.keys():
@@ -54,10 +76,27 @@ def get_project(projects, gh_issue, labels):
         raise Exception(f"Unknown project for theme '{gh_issue.title}': {labels}")
 
 
+class GithubConnection:
+    """A connection to GitHub."""
+
+    gh = None
+
+    @classmethod
+    def getconnection(cls, token=None):
+        """Get the connection."""
+        if not cls.gh:
+            token = token or os.environ.get("GITHUB_TOKEN")
+            if not token:
+                _logger.error("Github token must be provided or set as environment variable (GITHUB_TOKEN).")
+                sys.exit(1)
+            cls.gh = login(token=token)
+        return cls.gh
+
+
 def main():
     """Main entrypoint."""
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description=__doc__)
-    addStandardArguments(parser)
+    add_standard_arguments(parser)
     parser.add_argument("--github_token", help="github API token")
     parser.add_argument("--zenhub_token", help="zenhub API token")
     parser.add_argument("--build_number", help="build number, e.g. 13.0, 13.1", required=True)
@@ -86,7 +125,7 @@ def main():
         sys.exit(1)
 
     try:
-        gh = GithubConnection.getConnection(token=github_token)
+        gh = GithubConnection.getconnection(token=github_token)
         org = gh.organization(GITHUB_ORG)
         repos = org.repositories()
 
