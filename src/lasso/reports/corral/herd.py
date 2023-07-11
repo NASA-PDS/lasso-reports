@@ -5,7 +5,7 @@ import re
 from configparser import ConfigParser
 from datetime import datetime
 
-from pds_github_util.corral import CattleHead
+from lasso.reports.corral import CattleHead
 
 logger = logging.getLogger(__name__)
 

@@ -8,8 +8,8 @@ from shutil import copy
 from shutil import copytree
 from shutil import rmtree
 
-from lasso.reports.argparse import addStandardArguments
-from lasso.reports.branchs.git_actions import loop_checkout_on_branch
+from lasso.reports.argparse import add_standard_arguments
+from lasso.reports.branches.git_actions import loop_checkout_on_branch
 from pkg_resources import resource_filename
 
 from .root_index import update_index
@@ -87,7 +87,7 @@ def build_summaries(token, path=_path, format="md", version_pattern=None):
 def main():
     """Main entrypoint."""
     parser = argparse.ArgumentParser(description="Create new snapshot release")
-    addStandardArguments(parser)
+    add_standard_arguments(parser)
     parser.add_argument("--token", dest="token", help="github personal access token")
     parser.add_argument("--path", dest="path", default="./output/", help="directory where the summary will be created")
     parser.add_argument(
