@@ -25,7 +25,7 @@ def copy_resources():
     _logger.info("write static resources (img, config)...")
     resources = resource_filename(__name__, "resources")
     for f in os.listdir(resources):
-        i_p = os.path.oin(resources, f)
+        i_p = os.path.join(resources, f)
         o_p = os.path.join(os.getcwd(), f)
         if os.path.isdir(i_p):
             if os.path.exists(o_p):
