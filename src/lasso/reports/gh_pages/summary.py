@@ -19,13 +19,6 @@ REPO_TYPES = {
         "title": "Libraries and Clients",
         "description": "Libraries and Clients for programing interfaces to PDS services and data.",
     },
-    "service": {
-        "title": "Discipline Node Services",
-        "description": (
-            "Tools and Services that Discipline Node should deploy to enable integration "
-            "and interoperability across the PDS."
-        ),
-    },
     "core": {
         "title": "Engineering Node Services",
         "description": (
