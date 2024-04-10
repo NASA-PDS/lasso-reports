@@ -67,7 +67,7 @@ htmlcov
 .idea/
 *.iml
 .vscode
-*.sublime-workspace
+*.sublime-*
 
 # Shared objects (inc. Windows DLLs)
 *.dll
