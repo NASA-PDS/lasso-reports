@@ -1,10 +1,11 @@
 # PDS Lasso Reports
 
-The PDS Lasso Reports package provides utilities to generates various kinds of reports. It provides three commands:
+The PDS Lasso Reports package provides utilities to generates various kinds of reports. It provides four commands:
 
 - `git-ping` which "pings" a branch by making an empty commit+push to it
 - `summaries` which generates build summary tables in various formats
 - `pds-plan` which creates planning board reports
+- `pds-sloc` which analyzes and visualizes source lines of code (SLOC) across GitHub repositories
 
 Please visit our website at: https://nasa-pds.github.io/lasso-reports
 
@@ -13,7 +14,10 @@ It may have useful information for developers and end-users.
 
 ## Prerequisites
 
-Installing this software requires `git` to be present on the target systme.
+Installing this software requires:
+- `git` to be present on the target system
+- `cloc` for SLOC analysis (install via your system's package manager)
+- A GitHub personal access token (for accessing private repositories)
 
 
 ## User Quickstart
@@ -23,9 +27,38 @@ Install with:
     pip install lasso-reports
 
 
-To execute, run:
+### PDS SLOC
 
-    (put your run commands here)
+To execute pds-sloc, run:
+
+    # Basic usage - analyze NASA-PDS organization
+    pds-sloc --update --visualize
+
+    # Analyze a specific repository
+    pds-sloc --update --visualize --repo validate
+
+    # Initialize historical data from a specific date
+    pds-sloc --init-history 2023-01-01
+
+    # Generate visualizations from existing data
+    pds-sloc --visualize
+
+    # Use a specific GitHub token
+    pds-sloc --update --token YOUR_GITHUB_TOKEN
+
+    # Analyze a different organization
+    pds-sloc --update --visualize --org OTHER-ORG
+
+The tool will generate:
+- A CSV report with SLOC counts by repository and language
+- Visualizations showing:
+  - Total SLOC by repository
+  - Language distribution
+  - Historical SLOC trends
+  - Most active repositories
+
+For more options, run:
+    pds-sloc --help
 
 
 ## Code of Conduct
