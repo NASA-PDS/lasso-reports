@@ -10,19 +10,18 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../..'))
 
 
 # -- Project information -----------------------------------------------------
 
-# TODO - Update with your project name
-project = 'My PDS Project'
-copyright = '2022 California Institute of Technology'
+project = 'Lasso Reports'
+copyright = '2024 California Institute of Technology'
 author = 'NASA Planetary Data System'
-release = '0.0'
-version = '0.0'
+release = '0.1.0'
+version = '0.1.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -65,11 +64,10 @@ html_static_path = ['_static']
 
 html_logo = '_static/images/PDS_Planets.png'
 
-# TODO - Update with your user/org and repo
 html_context = {
     'display_github': True,
     "github_user": "nasa-pds",
-    "github_repo": "template-repo-python",
+    "github_repo": "lasso-reports",
     "github_version": "main/docs/source/"
 }
 
