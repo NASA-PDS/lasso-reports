@@ -22,13 +22,15 @@ logger = logging.getLogger(__name__)
 
 HEADERS = {}
 HISTORICAL_LOG_DIR = "data/history"
+OUTPUT_DIR = "output"
 HISTORICAL_LOG_FILE = os.path.join(HISTORICAL_LOG_DIR, "sloc_history.csv")
-PLOT_TRENDS_FILE = "sloc_trends.png"
-PLOT_LEGENDS_FILE = "sloc_trends_legend.png"
-PLOT_TOTAL_FILE = "total_sloc.png"
-PLOT_LANGUAGE_FILE = "language_trends.png"
-PLOT_REPO_FILE = "repo_comparison.png"
-PLOT_ACTIVE_FILE = "active_repos.png"
+SLOC_REPORT_FILE = os.path.join(OUTPUT_DIR, "sloc_report.csv")
+PLOT_TRENDS_FILE = os.path.join(OUTPUT_DIR, "sloc_trends.png")
+PLOT_LEGENDS_FILE = os.path.join(OUTPUT_DIR, "sloc_trends_legend.png")
+PLOT_TOTAL_FILE = os.path.join(OUTPUT_DIR, "total_sloc.png")
+PLOT_LANGUAGE_FILE = os.path.join(OUTPUT_DIR, "language_trends.png")
+PLOT_REPO_FILE = os.path.join(OUTPUT_DIR, "repo_comparison.png")
+PLOT_ACTIVE_FILE = os.path.join(OUTPUT_DIR, "active_repos.png")
 
 IGNORE_REPOS = [
     "naif-pds4-bundler",
@@ -58,6 +60,12 @@ IGNORE_REPOS = [
     "portal-wp",
     "edwg",
 ]
+
+
+def ensure_directories():
+    """Ensure that all required directories exist."""
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    os.makedirs(HISTORICAL_LOG_DIR, exist_ok=True)
 
 
 def get_org_repos(org):
@@ -96,6 +104,7 @@ def count_sloc(repo_dir):
 
 def write_historical_log(timestamp, repo_name, total_sloc, language_sloc):
     """Write SLOC data for a repository to the historical CSV log."""
+    ensure_directories()
     file_exists = os.path.isfile(HISTORICAL_LOG_FILE)
     with open(HISTORICAL_LOG_FILE, mode="a", newline="") as file:
         writer = csv.writer(file)
@@ -121,7 +130,7 @@ def load_data(historical=False):
         df["Timestamp"] = pd.to_datetime(df["Timestamp"])
         return df
     else:
-        df = pd.read_csv("sloc_report.csv")
+        df = pd.read_csv(SLOC_REPORT_FILE)
         # Convert language columns to numeric
         for col in df.columns:
             if col not in ["Repository Name", "Total SLOC"]:
@@ -298,8 +307,8 @@ def initialize_history(org, target_date, repo_name=None):
     repos = get_repo_info(org, repo_name)
     timestamp = f"{target_date} 00:00:00"
 
-    # Create history directory if it doesn't exist
-    os.makedirs(HISTORICAL_LOG_DIR, exist_ok=True)
+    # Ensure directories exist
+    ensure_directories()
 
     logger.info(f"Initializing historical data for {len(repos)} repositories at {target_date}")
     for repo in repos:
@@ -538,7 +547,9 @@ def main():
         default=os.getenv("GITHUB_TOKEN"),
         help="GitHub personal access token (default: GITHUB_TOKEN env var)",
     )
-    parser.add_argument("--output", default="sloc_report.csv", help="Output CSV report file")
+    parser.add_argument(
+        "--output", default=SLOC_REPORT_FILE, help=f"Output CSV report file (default: {SLOC_REPORT_FILE})"
+    )
     parser.add_argument("--visualize", action="store_true", help="Generate visualizations from existing data")
     parser.add_argument("--update", action="store_true", help="Update SLOC data by fetching from repositories")
     parser.add_argument("--init-history", help="Initialize historical data from a specific date (format: YYYY-MM-DD)")
@@ -561,7 +572,11 @@ def main():
 
     if args.update:
         os.makedirs("repos", exist_ok=True)
-        os.makedirs(HISTORICAL_LOG_DIR, exist_ok=True)
+
+        # Ensure output directory exists for custom output paths
+        output_dir = os.path.dirname(args.output)
+        if output_dir:
+            os.makedirs(output_dir, exist_ok=True)
 
         with open(args.output, mode="w", newline="") as file:
             writer = csv.writer(file)

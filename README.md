@@ -16,7 +16,7 @@ It may have useful information for developers and end-users.
 
 Installing this software requires:
 - `git` to be present on the target system
-- `cloc` for SLOC analysis (install via your system's package manager)
+- `cloc` for SLOC analysis (install via your system's package manager, e.g. Homebrew)
 - A GitHub personal access token (for accessing private repositories)
 
 
