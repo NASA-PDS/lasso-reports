@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 # -- Project information -----------------------------------------------------
 
 project = 'Lasso Reports'
-copyright = '2024 California Institute of Technology'
+copyright = '2024–2025 California Institute of Technology'
 author = 'NASA Planetary Data System'
 release = '0.1.0'
 version = '0.1.0'
@@ -36,11 +36,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
     'sphinx.ext.autosummary',
-    'sphinx_rtd_theme'
 ]
-
-# Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -77,8 +73,6 @@ html_css_files = [
 
 html_theme_options = {
     'canonical_url': '',
-    'logo_only': False,
-    'display_version': True,
     'prev_next_buttons_location': 'bottom',
     'style_external_links': False,
     # Toc options

@@ -1,6 +1,6 @@
 PDS Lasso Reports
 
-Copyright © 2023, California Institute of Technology ("Caltech").
+Copyright © 2023–2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
