@@ -158,7 +158,7 @@ def plot_total_sloc(df):
     plt.xticks(rotation=45, ha="right")
 
     # Format y-axis in thousands
-    plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f"{int(x/1000):,}k"))
+    plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f"{int(x / 1000):,}k"))
 
     plt.grid(True, linestyle="--", alpha=0.7)
     plt.tight_layout()
@@ -186,7 +186,7 @@ def plot_language_trends(df):
     plt.ylabel("Total SLOC (thousands)", fontsize=12)
 
     # Format y-axis in thousands
-    plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f"{int(x/1000):,}k"))
+    plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f"{int(x / 1000):,}k"))
 
     plt.xticks(rotation=45, ha="right")
     plt.grid(True, linestyle="--", alpha=0.7)
@@ -401,7 +401,7 @@ def plot_total_sloc_trends(df):
     plt.ylabel("Total SLOC (thousands)", fontsize=12)
 
     # Format y-axis in thousands
-    plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f"{int(x/1000):,}k"))
+    plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f"{int(x / 1000):,}k"))
 
     # Add grid
     plt.grid(True, linestyle="--", alpha=0.7)
@@ -516,7 +516,7 @@ def plot_active_repos(df):
     plt.xticks(rotation=45, ha="right")
 
     # Format y-axis in thousands
-    plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f"{int(x/1000):,}k"))
+    plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f"{int(x / 1000):,}k"))
 
     # Add a horizontal line at y=0
     plt.axhline(y=0, color="black", linestyle="-", alpha=0.3)

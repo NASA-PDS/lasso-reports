@@ -4,12 +4,12 @@ import logging
 import os
 import sys
 import traceback
+from importlib.resources import files
 
 from github3 import login
 from jinja2 import Template
 from lasso.reports.argparse import add_standard_arguments
 from lasso.reports.zenhub.zenhub import Zenhub
-from pkg_resources import resource_string
 from yaml import FullLoader
 from yaml import load
 
@@ -217,7 +217,7 @@ def main():
                 "pds4_changes": ddwg_plans,
                 "planned_changes": plan_output,
             }
-            template = Template(resource_string(__name__, "plan.template.rst").decode("utf-8"))
+            template = Template(files(__name__).joinpath("plan.template.rst").read_text(encoding="utf-8"))
             rst_str = template.render(template_kargs)
             f_out.write(rst_str)
 

@@ -105,3 +105,10 @@ output/
 !.gitattributes
 !.gitignore
 !.gitkeep
+
+# Generated reports and graphs
+active_repos.png
+language_trends.png
+sloc_report.csv
+sloc_trends.png
+total_sloc.png
