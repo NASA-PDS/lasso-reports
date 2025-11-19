@@ -1,7 +1,7 @@
 """Summary."""
+import io
 import logging
 import os
-import io
 
 import rstcloth
 from lasso.reports.corral.herd import Herd

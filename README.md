@@ -61,6 +61,17 @@ For more options, run:
     pds-sloc --help
 
 
+### PDS Software summary
+
+The `summaries` command generates summary tables for PDS software builds. To use it, run:
+
+    summaries --tokent <your github token> --path <directory for output files> --format <rst or md>
+
+This will create summary tables in the specified format (reStructuredText or Markdown) and save them to the specified directory.
+
+The summary generation mostly automatically run from a github action in pdsen-corral repository.
+
+
 ## Code of Conduct
 
 All users and developers of the NASA-PDS software are expected to abide by our [Code of Conduct](https://github.com/NASA-PDS/.github/blob/main/CODE_OF_CONDUCT.md). Please read this to ensure you understand the expectations of our community.
