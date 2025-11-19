@@ -10,7 +10,6 @@ from shutil import rmtree
 
 from lasso.reports.argparse import add_standard_arguments
 from lasso.reports.branches.git_actions import loop_checkout_on_branch
-from pkg_resources import resource_filename
 
 from .root_index import update_index
 from .summary import write_build_summary
@@ -23,7 +22,8 @@ GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN") or os.environ.get("ADMIN_GITHUB_TO
 def copy_resources():
     """Copies static resources into the expected place."""
     _logger.info("write static resources (img, config)...")
-    resources = resource_filename(__name__, "resources")
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    resources = os.path.join(current_dir, "resources")
     for f in os.listdir(resources):
         i_p = os.path.join(resources, f)
         o_p = os.path.join(os.getcwd(), f)

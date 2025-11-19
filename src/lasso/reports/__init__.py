@@ -1,5 +1,5 @@
 # encoding: utf-8
 """PDS Reports."""
-import pkg_resources
+import importlib.resources
 
-__version__ = VERSION = pkg_resources.resource_string(__name__, "VERSION.txt").decode("utf-8").strip()
+__version__ = VERSION = importlib.resources.files(__name__).joinpath("VERSION.txt").read_text().strip()

@@ -1,6 +1,7 @@
 """Summary."""
 import logging
 import os
+import io
 
 import rstcloth
 from lasso.reports.corral.herd import Herd
@@ -60,7 +61,7 @@ class RstClothReferenceable(rstcloth.RstCloth):
 
     def __init__(self, line_width=160):
         """Initializer."""
-        super().__init__(line_width=line_width)
+        super().__init__(io.StringIO(), line_width=line_width)
         self._deferred_directives = []
 
     def hyperlink(self, ref, url):
@@ -117,7 +118,7 @@ class RstClothReferenceable(rstcloth.RstCloth):
                 logger.info("{0} exists. ignoring.".format(dirpath))
 
         with open(filename, "w") as f:
-            f.write("\n".join(self._data))
+            f.write("\n".join(self.data))
             f.write("\n")
             f.write("\n".join(self._deferred_directives))
             f.write("\n")
