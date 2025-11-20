@@ -118,7 +118,7 @@ class RstClothReferenceable(rstcloth.RstCloth):
                 logger.info("{0} exists. ignoring.".format(dirpath))
 
         with open(filename, "w") as f:
-            f.write("\n".join(self.data))
+            f.write(self.data)
             f.write("\n")
             f.write("\n".join(self._deferred_directives))
             f.write("\n")
