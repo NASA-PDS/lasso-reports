@@ -1,8 +1,8 @@
 # Changelog
 
-## [release/2.1.0](https://github.com/NASA-PDS/lasso-reports/tree/release/2.1.0) (2025-11-19)
+## [v2.1.0](https://github.com/NASA-PDS/lasso-reports/tree/v2.1.0) (2025-11-19)
 
-[Full Changelog](https://github.com/NASA-PDS/lasso-reports/compare/v2.0.0...release/2.1.0)
+[Full Changelog](https://github.com/NASA-PDS/lasso-reports/compare/v2.0.0...v2.1.0)
 
 ## [v2.0.0](https://github.com/NASA-PDS/lasso-reports/tree/v2.0.0) (2025-11-04)
 
