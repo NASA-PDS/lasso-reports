@@ -2,6 +2,7 @@
 import io
 import logging
 import os
+from datetime import datetime
 
 import rstcloth
 from lasso.reports.corral.herd import Herd
@@ -10,6 +11,50 @@ from lasso.reports.tags.tags import Tags
 logger = logging.getLogger(__name__)
 
 COLUMNS = ["manual", "changelog", "requirements", "download", "license", "feedback"]
+
+# Configuration constants
+MIN_VERSION_FOR_INT_REPORTS = 16
+RELEASE_MONTHS = [6, 12]  # June and December
+
+
+def parse_version_number(version_string):
+    """Extract base version number from version string.
+
+    Examples:
+        "17" -> 17
+        "17.0" -> 17
+        "17.0-SNAPSHOT" -> 17
+        "B17" -> 17
+
+    :param version_string: Version string to parse
+    :return: Integer version number, or None if parsing fails
+    """
+    if not version_string:
+        return None
+    try:
+        # Remove 'B' prefix if present, split on '.' and '-', take first part
+        clean_version = version_string.lstrip('B').split('.')[0].split('-')[0]
+        return int(clean_version)
+    except (ValueError, AttributeError, IndexError):
+        logger.warning(f"Could not parse version number from: {version_string}")
+        return None
+
+
+def should_add_int_reports_to_current_build():
+    """Check if I&T reports should be added to current build.
+
+    Checks:
+    1. If current month is in release window (June or December)
+    2. If ADD_INT_REPORTS environment variable is set
+
+    :return: True if reports should be added, False otherwise
+    """
+    current_month = datetime.now().month
+    in_release_window = current_month in RELEASE_MONTHS
+
+    env_flag = os.environ.get("ADD_INT_REPORTS", "").lower() in ["true", "1", "yes"]
+
+    return in_release_window or env_flag
 
 REPO_TYPES = {
     "tool": {
@@ -51,7 +96,7 @@ def _indent_ok_for_table(content, indent):
             return "".join([indent, content])
 
 
-# Monkey-patchingthe function used in the rstpackage; should do a pull request eventually
+# Monkey-patching the function used in the rstpackage; should do a pull request eventually
 rstcloth.rstcloth._indent = _indent_ok_for_table
 _indent = _indent_ok_for_table
 
@@ -173,12 +218,40 @@ def write_md_file(herd, output_file_name, version):
     software_summary_md.create_md_file()
 
 
-def write_rst_introduction(d: RstClothReferenceable, version: str):
-    """Write a reStructuredText introduction."""
+def write_rst_introduction(d: RstClothReferenceable, version: str, is_current_build: bool = False):
+    """Write a reStructuredText introduction.
+
+    :param d: RstClothReferenceable object
+    :param version: Build version string
+    :param is_current_build: True if this is the latest/current build
+    """
     d.title(f"Software Catalog (Build {version})")
+
+    # Add I&T reports section for version 16+ (before category links)
+    version_num = parse_version_number(version)
+    if version_num and version_num >= MIN_VERSION_FOR_INT_REPORTS:
+        should_show_reports = False
+
+        if is_current_build:
+            # For current build: check time window or environment flag
+            should_show_reports = should_add_int_reports_to_current_build()
+            if should_show_reports:
+                logger.info(f"Adding I&T reports to current build {version}")
+        else:
+            # For past builds: always show
+            should_show_reports = True
+
+        if should_show_reports:
+            d.content("I&T (Integration & testing) review and results are available in the following 2 documents:")
+            d.newline()
+            d.li(f"`Delivery and Deployment Review <PDS-B{version_num}-DDR.pdf>`_")
+            d.li(f"`Combined TestRail Reports <PDS-B{version_num}-TestRail-reports.pdf>`_")
+            d.newline()
 
     d.content(f"The software provided for the PDS System Build {version} are listed below and organized by category:")
     d.newline()
+
+    # Add category links
     for t, section in REPO_TYPES.items():
         if t != "unknown":
             d.li(f"`{section['title']}`_")
@@ -186,11 +259,11 @@ def write_rst_introduction(d: RstClothReferenceable, version: str):
     d.newline()
 
 
-def write_rst_file(herd, output_file_name, version):
+def write_rst_file(herd, output_file_name, version, is_current_build=False):
     """Write the reStructuredText file."""
     d = RstClothReferenceable()
 
-    write_rst_introduction(d, version)
+    write_rst_introduction(d, version, is_current_build)
 
     # create one section per type of repo
     data = {t: [] for t in REPO_TYPES}
@@ -215,9 +288,13 @@ def write_rst_file(herd, output_file_name, version):
 
 
 def write_build_summary(
-    gitmodules=None, root_dir=".", output_file_name=None, token=None, dev=False, version=None, format="md"
+    gitmodules=None, root_dir=".", output_file_name=None, token=None, dev=False, version=None, format="md",
+    is_current_build=False, current_release=None
 ):
-    """Write the build summary."""
+    """Write the build summary.
+
+    :param current_release: The current release version from conf.py (e.g., "17")
+    """
     herd = Herd(gitmodules=gitmodules, dev=dev, token=token)
 
     if version is None:
@@ -226,7 +303,16 @@ def write_build_summary(
         # for unit test
         herd.set_shepard_version(version)
 
-    logger.info(f"build version is {version}")
+    # Check if this version matches the current release
+    if not is_current_build and current_release:
+        version_num = parse_version_number(version)
+        current_release_num = parse_version_number(current_release)
+
+        if version_num and current_release_num and version_num == current_release_num:
+            is_current_build = True
+            logger.info(f"Build {version} matches current release {current_release}")
+
+    logger.info(f"build version is {version} (is_current: {is_current_build})")
     is_dev = Tags.JAVA_DEV_SUFFIX in version or Tags.PYTHON_DEV_SUFFIX in version
     if dev and not is_dev:
         logger.error(
@@ -248,6 +334,6 @@ def write_build_summary(
     if format == "md":
         write_md_file(herd, output_file_name, version)
     elif format == "rst":
-        write_rst_file(herd, output_file_name, version)
+        write_rst_file(herd, output_file_name, version, is_current_build)
 
     return herd
