@@ -145,10 +145,6 @@ def main():
     parser.add_argument(
         "--format", dest="format", default="rst", help="format of the summary, accepted formats are md and rst"
     )
-    parser.add_argument(
-        "--add-int-reports", dest="add_int_reports", action="store_true",
-        help="Force add I&T reports in current build regardless of time window"
-    )
     args = parser.parse_args()
     logging.basicConfig(level=args.loglevel, format="%(levelname)s %(message)s")
 
@@ -156,11 +152,6 @@ def main():
     if not token:
         _logger.error("GitHub token must be provided or set as environment variable (GITHUB_TOKEN).")
         sys.exit(1)
-
-    # Set environment variable if flag is provided
-    if args.add_int_reports:
-        os.environ["ADD_INT_REPORTS"] = "true"
-        _logger.info("ADD_INT_REPORTS flag enabled: I&T reports will be added to current build")
 
     build_summaries(token, args.path, args.format)
 

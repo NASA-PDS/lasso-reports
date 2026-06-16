@@ -2,7 +2,6 @@
 import io
 import logging
 import os
-from datetime import datetime
 
 import rstcloth
 from lasso.reports.corral.herd import Herd
@@ -14,7 +13,6 @@ COLUMNS = ["manual", "changelog", "requirements", "download", "license", "feedba
 
 # Configuration constants
 MIN_VERSION_FOR_INT_REPORTS = 16
-RELEASE_MONTHS = [6, 12]  # June and December
 
 
 def parse_version_number(version_string):
@@ -40,21 +38,39 @@ def parse_version_number(version_string):
         return None
 
 
-def should_add_int_reports_to_current_build():
+def check_int_reports_exist(version_num, releases_root="releases"):
+    """Check if I&T report PDF files exist for the given version.
+
+    :param version_num: Integer version number (e.g., 17)
+    :param releases_root: Root directory for releases (default: "releases")
+    :return: True if both PDF files exist, False otherwise
+    """
+    ddr_file = os.path.join(releases_root, str(version_num), f"PDS-B{version_num}-DDR.pdf")
+    testrail_file = os.path.join(releases_root, str(version_num), f"PDS-B{version_num}-TestRail-reports.pdf")
+
+    ddr_exists = os.path.isfile(ddr_file)
+    testrail_exists = os.path.isfile(testrail_file)
+
+    if ddr_exists and testrail_exists:
+        logger.info("I&T reports found for version %s", version_num)
+        return True
+    else:
+        if not ddr_exists:
+            logger.debug("DDR file not found: %s", ddr_file)
+        if not testrail_exists:
+            logger.debug("TestRail reports file not found: %s", testrail_file)
+        return False
+
+
+def should_add_int_reports_to_current_build(version_num):
     """Check if I&T reports should be added to current build.
 
-    Checks:
-    1. If current month is in release window (June or December)
-    2. If ADD_INT_REPORTS environment variable is set
+    Checks if both PDF files exist in releases/{version}/ directory.
 
+    :param version_num: Integer version number to check
     :return: True if reports should be added, False otherwise
     """
-    current_month = datetime.now().month
-    in_release_window = current_month in RELEASE_MONTHS
-
-    env_flag = os.environ.get("ADD_INT_REPORTS", "").lower() in ["true", "1", "yes"]
-
-    return in_release_window or env_flag
+    return check_int_reports_exist(version_num)
 
 REPO_TYPES = {
     "tool": {
@@ -233,8 +249,8 @@ def write_rst_introduction(d: RstClothReferenceable, version: str, is_current_bu
         should_show_reports = False
 
         if is_current_build:
-            # For current build: check time window or environment flag
-            should_show_reports = should_add_int_reports_to_current_build()
+            # For current build: check if PDF files exist
+            should_show_reports = should_add_int_reports_to_current_build(version_num)
             if should_show_reports:
                 logger.info("Adding I&T reports to current build %s", version)
         else:
@@ -306,6 +322,22 @@ def write_build_summary(
     # Determine dev vs release once (used for validation and "current build" logic)
     is_dev = Tags.JAVA_DEV_SUFFIX in version or Tags.PYTHON_DEV_SUFFIX in version
 
+    # Validate that dev parameter matches version type
+    if dev and not is_dev:
+        logger.error(
+            "version of build does not contain %s or %s, "
+            "dev build summary is not generated",
+            Tags.JAVA_DEV_SUFFIX, Tags.PYTHON_DEV_SUFFIX
+        )
+        exit(1)
+    elif not dev and is_dev:
+        logger.error(
+            "version of build contains %s or %s, "
+            "release build summary is not generated",
+            Tags.JAVA_DEV_SUFFIX, Tags.PYTHON_DEV_SUFFIX
+        )
+        exit(1)
+
     # Check if this version matches the current release (exclude dev builds)
     if not is_current_build and current_release and not is_dev:
         version_num = parse_version_number(version)
@@ -315,20 +347,7 @@ def write_build_summary(
             is_current_build = True
             logger.info("Build %s matches current release %s", version, current_release)
 
-        logger.info("build version is %s (is_current: %s)", version, is_current_build)
-        logger.error(
-            "version of build does not contain %s or %s, "
-            "dev build summary is not generated", 
-            Tags.JAVA_DEV_SUFFIX, Tags.PYTHON_DEV_SUFFIX
-        )
-        exit(1)
-    elif not dev and is_dev:
-        logger.error(
-            "version of build contains %s or %s, "
-            "release build summary is not generated", 
-            Tags.JAVA_DEV_SUFFIX, Tags.PYTHON_DEV_SUFFIX
-        )
-        exit(1)
+    logger.info("build version is %s (is_current: %s)", version, is_current_build)
 
     if not output_file_name:
         output_file_name = os.path.join(root_dir, version, "index")
