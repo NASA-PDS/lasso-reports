@@ -303,18 +303,17 @@ def write_build_summary(
         # for unit test
         herd.set_shepard_version(version)
 
-    # Check if this version matches the current release
-    if not is_current_build and current_release:
+    # Determine dev vs release once (used for validation and "current build" logic)
+    is_dev = Tags.JAVA_DEV_SUFFIX in version or Tags.PYTHON_DEV_SUFFIX in version
+
+    # Check if this version matches the current release (exclude dev builds)
+    if not is_current_build and current_release and not is_dev:
         version_num = parse_version_number(version)
         current_release_num = parse_version_number(current_release)
 
         if version_num and current_release_num and version_num == current_release_num:
             is_current_build = True
             logger.info(f"Build {version} matches current release {current_release}")
-
-    logger.info(f"build version is {version} (is_current: {is_current_build})")
-    is_dev = Tags.JAVA_DEV_SUFFIX in version or Tags.PYTHON_DEV_SUFFIX in version
-    if dev and not is_dev:
         logger.error(
             f"version of build does not contain {Tags.JAVA_DEV_SUFFIX} or {Tags.PYTHON_DEV_SUFFIX}, "
             "dev build summary is not generated"
