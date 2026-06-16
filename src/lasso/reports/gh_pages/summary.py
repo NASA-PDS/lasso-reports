@@ -36,7 +36,7 @@ def parse_version_number(version_string):
         clean_version = version_string.lstrip('B').split('.')[0].split('-')[0]
         return int(clean_version)
     except (ValueError, AttributeError, IndexError):
-        logger.warning(f"Could not parse version number from: {version_string}")
+        logger.warning("Could not parse version number from: %s", version_string)
         return None
 
 
@@ -214,7 +214,7 @@ def write_md_file(herd, output_file_name, version):
         table.extend(ch.get_table_row(format="md"))
     software_summary_md.new_table(columns=n_columns, rows=herd.number_of_heads() + 1, text=table, text_align="center")
 
-    logger.info(f"Create file {output_file_name}.md")
+    logger.info("Create file %s.md", output_file_name)
     software_summary_md.create_md_file()
 
 
@@ -236,7 +236,7 @@ def write_rst_introduction(d: RstClothReferenceable, version: str, is_current_bu
             # For current build: check time window or environment flag
             should_show_reports = should_add_int_reports_to_current_build()
             if should_show_reports:
-                logger.info(f"Adding I&T reports to current build {version}")
+                logger.info("Adding I&T reports to current build %s", version)
         else:
             # For past builds: always show
             should_show_reports = True
@@ -283,7 +283,7 @@ def write_rst_file(herd, output_file_name, version, is_current_build=False):
 
     rst_column_header_images(d)
 
-    logger.info(f"Create file {output_file_name}.rst")
+    logger.info("Create file %s.rst", output_file_name) 
     d.write(f"{output_file_name}.rst")
 
 
@@ -313,16 +313,20 @@ def write_build_summary(
 
         if version_num and current_release_num and version_num == current_release_num:
             is_current_build = True
-            logger.info(f"Build {version} matches current release {current_release}")
+            logger.info("Build %s matches current release %s", version, current_release)
+
+        logger.info("build version is %s (is_current: %s)", version, is_current_build)
         logger.error(
-            f"version of build does not contain {Tags.JAVA_DEV_SUFFIX} or {Tags.PYTHON_DEV_SUFFIX}, "
-            "dev build summary is not generated"
+            "version of build does not contain %s or %s, "
+            "dev build summary is not generated", 
+            Tags.JAVA_DEV_SUFFIX, Tags.PYTHON_DEV_SUFFIX
         )
         exit(1)
     elif not dev and is_dev:
         logger.error(
-            f"version of build contains {Tags.JAVA_DEV_SUFFIX} or {Tags.PYTHON_DEV_SUFFIX}, "
-            "release build summary is not generated"
+            "version of build contains %s or %s, "
+            "release build summary is not generated", 
+            Tags.JAVA_DEV_SUFFIX, Tags.PYTHON_DEV_SUFFIX
         )
         exit(1)
 
