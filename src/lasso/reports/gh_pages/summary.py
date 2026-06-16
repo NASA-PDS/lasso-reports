@@ -242,7 +242,7 @@ def write_rst_introduction(d: RstClothReferenceable, version: str, is_current_bu
             should_show_reports = True
 
         if should_show_reports:
-            d.content("I&T (Integration & testing) review and results are available in the following 2 documents:")
+            d.content("I&T (Integration & Testing) review and results are available in the following two documents:")
             d.newline()
             d.li(f"`Delivery and Deployment Review <PDS-B{version_num}-DDR.pdf>`_")
             d.li(f"`Combined TestRail Reports <PDS-B{version_num}-TestRail-reports.pdf>`_")

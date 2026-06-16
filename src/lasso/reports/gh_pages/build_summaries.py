@@ -33,31 +33,31 @@ def get_current_release_from_conf(conf_path="docs/source/conf.py"):
     :return: Current release version string (e.g., "17" from "B17"), or None if not found
     """
     try:
-        with open(conf_path, 'r') as f:
+        with open(conf_path, 'r', encoding='utf-8') as f:
             content = f.read()
             # Look for: release = 'B17' or release = "B17.0" etc.
             # Capture everything after = until the closing quote
             match = re.search(r"release\s*=\s*['\"]([^'\"]+)['\"]", content)
             if match:
                 release_string = match.group(1)
-                _logger.info(f"Found release in conf.py: {release_string}")
+                _logger.info("Found release in conf.py: %s", release_string)
                 # Extract just the numeric version (e.g., "17" from "B17" or "B17.0")
                 version_match = re.search(r'B?(\d+(?:\.\d+)*)', release_string)
                 if version_match:
                     version = version_match.group(1).split('.')[0]  # Get base version
-                    _logger.info(f"Parsed current release version: {version}")
+                    _logger.info("Parsed current release version: %s", version)
                     return version
                 else:
-                    _logger.warning(f"Could not extract version number from: {release_string}")
+                    _logger.warning("Could not extract version number from: %s", release_string)
                     return None
             else:
-                _logger.warning(f"Could not find 'release' variable in {conf_path}")
+                _logger.warning("Could not find 'release' variable in %s", conf_path)
                 return None
     except FileNotFoundError:
-        _logger.warning(f"conf.py not found at {conf_path}")
+        _logger.warning("conf.py not found at %s", conf_path)
         return None
     except IOError as e:
-        _logger.error(f"Error reading conf.py: {e}")
+        _logger.error("Error reading conf.py: %s", e)
         return None
 
 
@@ -89,9 +89,9 @@ def build_summaries(token, path=_path, format="md", version_pattern=None):
     conf_path = os.path.join(os.path.dirname(path.rstrip('/')), "conf.py")
     current_release = get_current_release_from_conf(conf_path)
     if current_release:
-        _logger.info(f"Current release from conf.py: Build {current_release}")
+        _logger.info("Current release from conf.py: Build %s", current_release)
     else:
-        _logger.warning(f"Could not determine current release from conf.py at {conf_path}")
+        _logger.warning("Could not determine current release from conf.py at %s", conf_path)
 
     if not version_pattern:
         # dev release on main
@@ -154,7 +154,7 @@ def main():
 
     token = args.token or GITHUB_TOKEN
     if not token:
-        _logger.error("Github token must be provided or set as environment variable (GITHUB_TOKEN).")
+        _logger.error("GitHub token must be provided or set as environment variable (GITHUB_TOKEN).")
         sys.exit(1)
 
     # Set environment variable if flag is provided
