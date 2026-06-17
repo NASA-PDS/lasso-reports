@@ -2,6 +2,7 @@
 import argparse
 import logging
 import os
+import re
 import sys
 from functools import partial
 from importlib.resources import files
@@ -18,6 +19,46 @@ from .summary import write_build_summary
 
 _logger, _path = logging.getLogger(__name__), os.getcwd()
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN") or os.environ.get("ADMIN_GITHUB_TOKEN")
+
+
+def get_current_release_from_conf(conf_path="docs/source/conf.py"):
+    """Get the current release version from nasa-pds.github.io conf.py.
+
+    Extracts the release version from lines like:
+        release = 'B17'
+        release = "B17.0"
+        release = '17'
+
+    :param conf_path: Path to conf.py file
+    :return: Current release version string (e.g., "17" from "B17"), or None if not found
+    """
+    try:
+        with open(conf_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+            # Look for: release = 'B17' or release = "B17.0" etc.
+            # Capture everything after = until the closing quote
+            match = re.search(r"release\s*=\s*['\"]([^'\"]+)['\"]", content)
+            if match:
+                release_string = match.group(1)
+                _logger.info("Found release in conf.py: %s", release_string)
+                # Extract just the numeric version (e.g., "17" from "B17" or "B17.0")
+                version_match = re.search(r'B?(\d+(?:\.\d+)*)', release_string)
+                if version_match:
+                    version = version_match.group(1).split('.')[0]  # Get base version
+                    _logger.info("Parsed current release version: %s", version)
+                    return version
+                else:
+                    _logger.warning("Could not extract version number from: %s", release_string)
+                    return None
+            else:
+                _logger.warning("Could not find 'release' variable in %s", conf_path)
+                return None
+    except FileNotFoundError:
+        _logger.warning("conf.py not found at %s", conf_path)
+        return None
+    except IOError as e:
+        _logger.error("Error reading conf.py: %s", e)
+        return None
 
 
 def copy_resources():
@@ -43,6 +84,15 @@ def build_summaries(token, path=_path, format="md", version_pattern=None):
 
     herds = []
 
+    # Get the current release version from conf.py
+    # path is typically "./docs/source/releases/", so conf.py is one level up
+    conf_path = os.path.join(os.path.dirname(path.rstrip('/')), "conf.py")
+    current_release = get_current_release_from_conf(conf_path)
+    if current_release:
+        _logger.info("Current release from conf.py: Build %s", current_release)
+    else:
+        _logger.warning("Could not determine current release from conf.py at %s", conf_path)
+
     if not version_pattern:
         # dev release on main
         herd = next(
@@ -56,6 +106,7 @@ def build_summaries(token, path=_path, format="md", version_pattern=None):
                     token=token,
                     dev=True,
                     format=format,
+                    current_release=current_release,  # Pass current release for checking
                 ),
                 token=token,
                 local_git_tmp_dir="/tmp",
@@ -75,6 +126,7 @@ def build_summaries(token, path=_path, format="md", version_pattern=None):
             token=token,
             dev=False,
             format=format,
+            current_release=current_release,  # Pass current release for checking
         ),
         token=token,
         local_git_tmp_dir="/tmp",
@@ -98,7 +150,7 @@ def main():
 
     token = args.token or GITHUB_TOKEN
     if not token:
-        _logger.error("Github token must be provided or set as environment variable (GITHUB_TOKEN).")
+        _logger.error("GitHub token must be provided or set as environment variable (GITHUB_TOKEN).")
         sys.exit(1)
 
     build_summaries(token, args.path, args.format)
