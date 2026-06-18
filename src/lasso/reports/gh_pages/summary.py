@@ -72,6 +72,7 @@ def should_add_int_reports_to_current_build(version_num):
     """
     return check_int_reports_exist(version_num)
 
+
 REPO_TYPES = {
     "tool": {
         "title": "Standalone Tools",
@@ -299,7 +300,7 @@ def write_rst_file(herd, output_file_name, version, is_current_build=False):
 
     rst_column_header_images(d)
 
-    logger.info("Create file %s.rst", output_file_name) 
+    logger.info("Create file %s.rst", output_file_name)
     d.write(f"{output_file_name}.rst")
 
 
