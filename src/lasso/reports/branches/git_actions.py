@@ -25,7 +25,12 @@ def loop_checkout_on_branch(repo_full_name, branch_regex, callback, token=None, 
     if os.path.exists(local_path):
         shutil.rmtree(local_path)
 
-    for branch in gh_repo.branches():
+    # Convert iterator to list to prevent iterator exhaustion across multiple calls
+    # Without this, the second call to loop_checkout_on_branch will start where
+    # the first one left off, missing all the branches that were already consumed
+    all_branches = list(gh_repo.branches())
+
+    for branch in all_branches:
         if prog.match(branch.name):
             logger.info(f"branch {branch.name}")
             remote_url = gh_repo.git_url.replace("git://", f"https://{token}:x-oauth-basic@")
