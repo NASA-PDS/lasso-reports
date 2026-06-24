@@ -136,7 +136,8 @@ class CattleHead:
 
     def _get_cell(self, function, format="md"):
         """Get the cell."""
-        link_func = eval(f"self._get_{function}_link()")
+        method_name = f"_get_{function}_link"
+        link_func = getattr(self, method_name)()
         if format == "md":
             return f'[![{function}]({self._icon_dict[function]})]({link_func} "{function}")' if link_func else " "
         elif format == "rst":
