@@ -130,7 +130,7 @@ class CattleHead:
         try:
             response = requests.head(url, timeout=time_out, headers=headers)
             return response.status_code != 404
-        except requests.exceptions:
+        except requests.exceptions.RequestException:
             logger.info(f"url {url} not reachable in {time_out}s")
             return False
 
