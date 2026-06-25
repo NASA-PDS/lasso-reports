@@ -254,7 +254,7 @@ def write_rst_introduction(d: RstClothReferenceable, version: str, is_current_bu
             should_show_reports = should_add_int_reports_to_current_build(version_num)
             if should_show_reports:
                 logger.info("Adding I&T reports to current build %s", version)
-        elif not is_dev:
+        elif not (Tags.JAVA_DEV_SUFFIX in version or Tags.PYTHON_DEV_SUFFIX in version):
             # For past stable builds: always show
             should_show_reports = True
         else:

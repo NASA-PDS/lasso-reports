@@ -130,8 +130,8 @@ class CattleHead:
         try:
             response = requests.head(url, timeout=time_out, headers=headers)
             return response.status_code != 404
-        except requests.exceptions.RequestException:
-            logger.info(f"url {url} not reachable in {time_out}s")
+        except requests.exceptions.RequestException as ex:
+            logger.info("url %s not reachable in %ds: %s", url, time_out, ex)
             return False
 
     def _get_cell(self, function, format="md"):
