@@ -254,9 +254,12 @@ def write_rst_introduction(d: RstClothReferenceable, version: str, is_current_bu
             should_show_reports = should_add_int_reports_to_current_build(version_num)
             if should_show_reports:
                 logger.info("Adding I&T reports to current build %s", version)
-        else:
-            # For past builds: always show
+        elif not (Tags.JAVA_DEV_SUFFIX in version or Tags.PYTHON_DEV_SUFFIX in version):
+            # For past stable builds: always show
             should_show_reports = True
+        else:
+            # For SNAPSHOT/dev builds: never show
+            should_show_reports = False
 
         if should_show_reports:
             d.content("I&T (Integration & Testing) review and results are available in the following two documents:")

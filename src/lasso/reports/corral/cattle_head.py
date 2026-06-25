@@ -130,13 +130,14 @@ class CattleHead:
         try:
             response = requests.head(url, timeout=time_out, headers=headers)
             return response.status_code != 404
-        except requests.exceptions:
-            logger.info(f"url {url} not reachable in {time_out}s")
+        except requests.exceptions.RequestException as ex:
+            logger.info("url %s not reachable in %ds: %s", url, time_out, ex)
             return False
 
     def _get_cell(self, function, format="md"):
         """Get the cell."""
-        link_func = eval(f"self._get_{function}_link()")
+        method_name = f"_get_{function}_link"
+        link_func = getattr(self, method_name)()
         if format == "md":
             return f'[![{function}]({self._icon_dict[function]})]({link_func} "{function}")' if link_func else " "
         elif format == "rst":
